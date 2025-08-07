@@ -1,3 +1,5 @@
+import os
+from django.conf import settings
 from django.db import models
 
 class Product(models.Model):
@@ -8,3 +10,11 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+    
+    @property
+    def image_url(self):
+        if self.image:  
+            path = os.path.join(settings.MEDIA_ROOT, str(self.image))
+            if os.path.exists(path):  
+                return self.image.url
+        return None 
