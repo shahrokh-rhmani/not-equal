@@ -2,48 +2,62 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-white"><i class="bi bi-funnel"></i> فیلتر محصولات</h6>
-            <button class="btn btn-sm btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+            <button class="btn btn-sm btn-light" type="button" data-bs-toggle="collapse"
+                data-bs-target="#filterCollapse">
                 <i class="bi bi-chevron-down"></i>
             </button>
         </div>
+
         <div class="card-body collapse show" id="filterCollapse">
             <form method="get" class="row g-3">
-                <div class="col-md-4">
+                <!-- search -->
+                <div class="col-md-3">
                     <label for="search" class="form-label text-end">جستجو</label>
                     <div class="input-group">
-                        <input type="text" class="form-control text-end" id="search" name="search" 
-                               value="{{ search_query }}" placeholder="نام محصول...">
+                        <input type="text" class="form-control text-end" id="search" name="search"
+                            value="{{ search_query }}" placeholder="نام محصول...">
                         <span class="input-group-text"><i class="bi bi-search"></i></span>
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <label for="min_price" class="form-label text-end">حداقل قیمت</label>
-                    <div class="input-group">
-                        <input type="number" class="form-control text-end" id="min_price" name="min_price" 
-                               value="{{ filters.min_price }}" placeholder="حداقل">
-                        <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <label for="max_price" class="form-label text-end">حداکثر قیمت</label>
-                    <div class="input-group">
-                        <input type="number" class="form-control text-end" id="max_price" name="max_price" 
-                               value="{{ filters.max_price }}" placeholder="حداکثر">
-                        <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
-                    </div>
-                </div>
+
+                <!-- Inventory status -->
                 <div class="col-md-2">
                     <label for="availability" class="form-label text-end">وضعیت موجودی</label>
                     <select class="form-select text-end" id="availability" name="availability">
                         <option value="">همه</option>
-                        <option value="available" {% if filters.availability == 'available' %}selected{% endif %}>موجود</option>
-                        <option value="unavailable" {% if filters.availability == 'unavailable' %}selected{% endif %}>ناموجود</option>
+                        <option value="available" {% if filters.availability == 'available' %}selected{% endif %}>موجود
+                        </option>
+                        <option value="unavailable" {% if filters.availability == 'unavailable' %}selected{% endif %}>
+                            ناموجود</option>
                     </select>
                 </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary filter-btn w-100">
-                        <i class="bi bi-filter"></i> اعمال فیلتر
-                    </button>
+
+                <!-- Price range -->
+                <div class="col-md-4">
+                    <label for="price-range" class="form-label text-end">محدوده قیمت</label>
+                    <div class="d-flex justify-content-between mb-2">
+                        <div class="input-group" style="width: 48%;">
+                            <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                            <input type="number" class="form-control text-end" id="min_price" name="min_price"
+                                value="{{ filters.min_price|default:0 }}" placeholder="حداقل" min="0">
+                        </div>
+                        <div class="input-group" style="width: 48%;">
+                            <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                            <input type="number" class="form-control text-end" id="max_price" name="max_price"
+                                value="{{ filters.max_price|default:1000000 }}" placeholder="حداکثر" min="0">
+                        </div>
+                    </div>
+
+                    <div id="price-range" class="mt-5"></div>
+                </div>
+
+                <!-- Apply filter button -->
+                <div class="col-md-3 filter-btn-container">
+                    <div class="mt-auto">
+                        <button type="submit" class="btn btn-primary filter-btn w-100">
+                            <i class="bi bi-filter"></i> اعمال فیلتر
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
