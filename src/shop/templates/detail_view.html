@@ -1,0 +1,254 @@
+{% extends '_base.html' %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="container" dir="rtl">
+    <div class="row">
+        <!-- Product Image -->
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                {% if product.image_url %}
+                <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
+                {% else %}
+                <div class="text-center py-5 bg-light">
+                    <i class="bi bi-image text-muted" style="font-size: 5rem;"></i>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Product Details -->
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h1 class="h3 mb-3">{{ product.name }}</h1>
+                    
+                    <!-- Rating -->
+                    <div class="mb-3">
+                        <div class="mb-1 d-flex">
+                            {% with ''|center:5 as range %}
+                            {% for _ in range %}
+                            {% if forloop.counter <= average_rating|default:0 %} <span class="star filled ms-1">★</span>
+                                {% else %}
+                                <span class="star ms-1">★</span>
+                                {% endif %}
+                                {% endfor %}
+                                {% endwith %}
+                                <span class="text-muted me-2">({{ ratings_count }} رأی)</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Price & Availability -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="badge bg-{% if product.is_available %}success{% else %}danger{% endif %} fs-6">
+                            {% if product.is_available %}
+                            <i class="bi bi-check-circle"></i> موجود
+                            {% else %}
+                            <i class="bi bi-x-circle"></i> ناموجود
+                            {% endif %}
+                        </span>
+                        <h3 class="text-primary mb-0">{{ product.price }} تومان</h3>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <h5 class="mb-2">توضیحات محصول</h5>
+                        <p class="text-muted">{{ product.description|linebreaks }}</p>
+                    </div>
+                    
+                    <!-- Add to Cart Button -->
+                    <div class="d-grid">
+                        <button class="btn btn-primary btn-lg">
+                            <i class="bi bi-cart-plus"></i> افزودن به سبد خرید
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rating Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="h5 mb-4">ثبت نظر و امتیاز</h3>
+                    
+                    {% if user_rating %}
+                    <div class="alert alert-info mb-4">
+                        شما قبلاً به این محصول امتیاز داده‌اید.
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Score Field - Star Rating -->
+                        <div class="mb-4">
+                            <label class="form-label">امتیاز شما</label>
+                            <div class="rating-reverse" id="star-rating-container">
+                                {% for i in "54321" %}
+                                <input class="visually-hidden" type="radio" name="score" id="score{{ i }}" 
+                                       value="{{ i }}" {% if form.score.value == i|add:"0" %}checked{% endif %}>
+                                <label for="score{{ i }}" class="star">
+                                    <span>★</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                            {% if form.score.errors %}
+                            <div class="text-danger small mt-2">
+                                {{ form.score.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Comment Field -->
+                        <div class="mb-4">
+                            <label for="{{ form.comment.id_for_label }}" class="form-label">نظر شما (اختیاری)</label>
+                            <textarea name="comment" class="form-control {% if form.comment.errors %}is-invalid{% endif %}" 
+                                      rows="4" placeholder="نظر خود درباره این محصول بنویسید...">{{ form.comment.value|default:'' }}</textarea>
+                            {% if form.comment.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.comment.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <button type="submit" name="submit_rating" class="btn btn-primary">
+                            ثبت نظر
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- User Reviews -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="h5 mb-4">نظرات کاربران</h3>
+                    
+                    {% if ratings %}
+                    <div class="list-group">
+                        {% for rating in ratings %}
+                        <div class="list-group-item border-0 py-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <div class="d-flex align-items-center">
+                                    <div class="rating me-2 d-flex">
+                                        {% with ''|center:5 as range %}
+                                        {% for _ in range %}
+                                        {% if forloop.counter <= rating.score %} <span class="star filled ms-1">★</span>
+                                            {% else %}
+                                            <span class="star ms-1">★</span>
+                                            {% endif %}
+                                            {% endfor %}
+                                            {% endwith %}
+                                    </div>
+                                    <strong>{{ rating.user.get_full_name|default:rating.user.username }}</strong>
+                                </div>
+                                <small class="text-muted">{{ rating.created_at|date:"Y/m/d" }}</small>
+                            </div>
+                            {% if rating.comment %}
+                            <p class="mb-0">{{ rating.comment }}</p>
+                            {% else %}
+                            <p class="text-muted mb-0">بدون توضیح</p>
+                            {% endif %}
+                        </div>
+                        {% if not forloop.last %}<hr class="my-1">{% endif %}
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-chat-square-text text-muted" style="font-size: 3rem;"></i>
+                        <p class="mt-3 text-muted">هنوز نظری ثبت نشده است.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .star {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 1.5rem;
+        color: #6c757d;
+    }
+    
+    .star.filled {
+        color: #ffc107;
+    }
+    
+    .rating-reverse {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+    
+    .rating input[type="radio"] {
+        display: none;
+    }
+    
+    .rating label:hover,
+    .rating label:hover ~ label,
+    .rating input[type="radio"]:checked ~ label {
+        color: #ffc107;
+    }
+    
+    .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize stars based on current selection
+    const checkedStar = document.querySelector('#star-rating-container input[type="radio"]:checked');
+    if (checkedStar) {
+        const stars = document.querySelectorAll('#star-rating-container label');
+        const checkedValue = parseInt(checkedStar.value);
+        
+        stars.forEach((star, index) => {
+            if (5 - index <= checkedValue) {
+                star.classList.add('filled');
+            } else {
+                star.classList.remove('filled');
+            }
+        });
+    }
+    
+    // Handle click events
+    document.querySelectorAll('#star-rating-container input[type="radio"]').forEach(star => {
+        star.addEventListener('change', function() {
+            const stars = document.querySelectorAll('#star-rating-container label');
+            const selectedValue = parseInt(this.value);
+            
+            stars.forEach((star, index) => {
+                if (5 - index <= selectedValue) {
+                    star.classList.add('filled');
+                } else {
+                    star.classList.remove('filled');
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,4 +1,5 @@
 from django import forms
+from .models import Rating 
 
 class ProductFilterForm(forms.Form):
     search = forms.CharField(
@@ -41,3 +42,31 @@ class ProductFilterForm(forms.Form):
             "id": "availability"
         })
     )
+
+
+class RatingForm(forms.ModelForm):
+    class Meta:
+        model = Rating
+        fields = ['score', 'comment']
+        widgets = {
+            'comment': forms.Textarea(attrs={
+                'rows': 4,
+                'class': 'form-control',
+                'placeholder': 'نظر خود درباره این محصول بنویسید...'
+            }),
+        }
+        labels = {
+            'score': 'امتیاز',
+            'comment': 'نظر (اختیاری)',
+        }
+        error_messages = {
+            'score': {
+                'required': 'لطفاً به محصول امتیاز دهید.',
+                'min_value': 'حداقل امتیاز 1 است.',
+                'max_value': 'حداکثر امتیاز 5 است.',
+            },
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['score'].widget = forms.HiddenInput()
