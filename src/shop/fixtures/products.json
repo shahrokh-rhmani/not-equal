@@ -1,0 +1,52 @@
+[
+  {
+    "model": "shop.product",
+    "pk": 1,
+    "fields": {
+      "name": "لپ‌تاپ",
+      "price": 1500,
+      "is_available": true,
+      "image": "products/laptop.jpg"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 2,
+    "fields": {
+      "name": "موبایل",
+      "price": 2000,
+      "is_available": true,
+      "image": "products/mobile.jpg"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 3,
+    "fields": {
+      "name": "تبلت",
+      "price": 1000,
+      "is_available": false,
+      "image": "products/tablet.jpg"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 4,
+    "fields": {
+      "name": "ps4",
+      "price": 500,
+      "is_available": false,
+      "image": "products/ps4.jpg"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 5,
+    "fields": {
+      "name": "ps5",
+      "price": 1000,
+      "is_available": true,
+      "image": "products/ps5.jpg"
+    }
+  }
+]
