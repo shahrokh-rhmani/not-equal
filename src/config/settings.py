@@ -111,7 +111,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]  # development
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # production
+STATIC_ROOT = "/var/www/not-equal/static/"  # production
 
 
 MEDIA_ROOT = BASE_DIR / 'media'
