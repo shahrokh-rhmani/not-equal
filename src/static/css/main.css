@@ -1,0 +1,92 @@
+:root {
+  --primary-color: #4e73df;
+  --secondary-color: #f8f9fc;
+}
+
+/* Layout Styles */
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: Vazirmatn, sans-serif;
+  background-color: var(--secondary-color);
+  text-align: right !important;
+  direction: rtl;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+  padding-bottom: 60px; /* Extra space for footer*/
+}
+
+footer {
+  flex-shrink: 0;
+  background-color: #343a40;
+  color: white;
+  padding: 1rem 0;
+}
+
+/* Navbar Styles */
+.navbar-brand {
+  font-weight: 600;
+}
+
+/* Card Styles */
+.card {
+  border-radius: 0.5rem;
+  box-shadow: 0 0.15rem 0.5rem rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card-header {
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 0.5rem 0.5rem 0 0 !important;
+}
+
+/* Form Styles */
+.form-control, 
+.input-group-text, 
+.form-select {
+  direction: rtl;
+}
+
+.input-group-text {
+  border-left: none;
+  border-right: 1px solid #ced4da;
+}
+
+.form-control {
+  border-right: none;
+  border-left: 1px solid #ced4da;
+}
+
+/* Product Styles */
+.product-img {
+  height: 180px;
+  object-fit: contain;
+  padding: 10px;
+}
+
+/* Button Styles */
+.filter-btn {
+  width: 100%;
+}
+
+/* Empty State Styles */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+}
+
+.empty-state i {
+  font-size: 3rem;
+  color: #6c757d;
+}

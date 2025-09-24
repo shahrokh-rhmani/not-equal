@@ -1,33 +1,77 @@
 {% extends '_base.html' %}
 
-{% block title %}Product List{% endblock %}
+{% block title %}لیست محصولات{% endblock %}
 
 {% block content %}
-    <h2>Method 1: exclude(price=1000)</h2>
-    <ul>
-        {% for product in method1 %}
-            <li>{{ product.name }} - {{ product.price }} - Available: {{ product.is_available }}</li>
+<div class="container" dir="rtl">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="bi bi-grid"></i> لیست محصولات</h1>
+    </div>
+
+    <!-- Products Grid -->
+    {% if products %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        {% for product in products %}
+        <div class="col">
+            <div class="card h-100">
+                {% if product.image_url %}
+                <img src="{{ product.image_url }}" class="card-img-top product-img" alt="{{ product.name }}">
+                {% else %}
+                <div class="text-center py-4 bg-light">
+                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title text-end">{{ product.name }}</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-{% if product.is_available %}success{% else %}danger{% endif %}">
+                            {% if product.is_available %}
+                                <i class="bi bi-check-circle"></i> موجود
+                            {% else %}
+                                <i class="bi bi-x-circle"></i> ناموجود
+                            {% endif %}
+                        </span>
+                        <h5 class="text-primary mb-0">{{ product.price }} تومان</h5>
+                    </div>
+                    <p class="card-text text-muted small text-end">{{ product.description|truncatechars:60 }}</p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-eye"></i> مشاهده جزئیات
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         {% endfor %}
-    </ul>
-    
-    <h2>Method 2: filter(~Q(price=1000))</h2>
-    <ul>
-        {% for product in method2 %}
-            <li>{{ product.name }} - {{ product.price }} - Available: {{ product.is_available }}</li>
-        {% endfor %}
-    </ul>
-    
-    <h2>Method 3: exclude(lt).exclude(gt)</h2>
-    <ul>
-        {% for product in method3 %}
-            <li>{{ product.name }} - {{ product.price }} - Available: {{ product.is_available }}</li>
-        {% endfor %}
-    </ul>
-    
-    <h2>Combined: Available and price != 1000</h2>
-    <ul>
-        {% for product in combined %}
-            <li>{{ product.name }} - {{ product.price }} - Available: {{ product.is_available }}</li>
-        {% endfor %}
-    </ul>
+    </div>
+    {% else %}
+    <div class="card shadow">
+        <div class="card-body empty-state text-center">
+            <i class="bi bi-exclamation-circle"></i>
+            <h5 class="mt-3">محصولی یافت نشد</h5>
+            <p class="text-muted">با تغییر فیلترهای جستجو مجدداً امتحان کنید</p>
+            <a href="?" class="btn btn-primary mt-2">
+                <i class="bi bi-arrow-counterclockwise"></i> بازنشانی فیلترها
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Pagination -->
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item">
+                <a class="page-link" href="#">بعدی</a>
+            </li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item">
+                <a class="page-link" href="#">قبلی</a>
+            </li>
+        </ul>
+    </nav>
+</div>
 {% endblock %}

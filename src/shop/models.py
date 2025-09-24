@@ -6,5 +6,11 @@ class Product(models.Model):
     is_available = models.BooleanField(default=True)
     image = models.ImageField(upload_to='products/', null=True, blank=True)
 
+    @property
+    def image_url(self):
+        if self.image:
+            return self.image.url
+        return None
+
     def __str__(self):
         return self.name
