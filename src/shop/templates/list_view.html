@@ -1,0 +1,33 @@
+{% extends '_base.html' %}
+
+{% block title %}Product List{% endblock %}
+
+{% block content %}
+    <h2>Method 1: exclude(price=1000)</h2>
+    <ul>
+        {% for product in method1 %}
+            <li>{{ product.name }} - {{ product.price }} - Available: {{ product.is_available }}</li>
+        {% endfor %}
+    </ul>
+    
+    <h2>Method 2: filter(~Q(price=1000))</h2>
+    <ul>
+        {% for product in method2 %}
+            <li>{{ product.name }} - {{ product.price }} - Available: {{ product.is_available }}</li>
+        {% endfor %}
+    </ul>
+    
+    <h2>Method 3: exclude(lt).exclude(gt)</h2>
+    <ul>
+        {% for product in method3 %}
+            <li>{{ product.name }} - {{ product.price }} - Available: {{ product.is_available }}</li>
+        {% endfor %}
+    </ul>
+    
+    <h2>Combined: Available and price != 1000</h2>
+    <ul>
+        {% for product in combined %}
+            <li>{{ product.name }} - {{ product.price }} - Available: {{ product.is_available }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
