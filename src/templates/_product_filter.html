@@ -12,24 +12,14 @@
             <form method="get" class="row g-3">
                 <!-- search -->
                 <div class="col-md-3">
-                    <label for="search" class="form-label text-end">جستجو</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control text-end" id="search" name="search"
-                            value="{{ search_query }}" placeholder="نام محصول...">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
-                    </div>
+                    {{ form.search.label_tag }}
+                    {{ form.search }}
                 </div>
 
                 <!-- Inventory status -->
                 <div class="col-md-2">
-                    <label for="availability" class="form-label text-end">وضعیت موجودی</label>
-                    <select class="form-select text-end" id="availability" name="availability">
-                        <option value="">همه</option>
-                        <option value="available" {% if filters.availability == 'available' %}selected{% endif %}>موجود
-                        </option>
-                        <option value="unavailable" {% if filters.availability == 'unavailable' %}selected{% endif %}>
-                            ناموجود</option>
-                    </select>
+                    {{ form.availability.label_tag }}
+                    {{ form.availability }}
                 </div>
 
                 <!-- Price range -->
@@ -39,12 +29,12 @@
                         <div class="input-group" style="width: 48%;">
                             <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
                             <input type="number" class="form-control text-end" id="min_price" name="min_price"
-                                value="{{ filters.min_price|default:0 }}" placeholder="حداقل" min="0">
+                                value="{{ form.min_price.value|default:0 }}" placeholder="حداقل" min="0">
                         </div>
                         <div class="input-group" style="width: 48%;">
                             <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
                             <input type="number" class="form-control text-end" id="max_price" name="max_price"
-                                value="{{ filters.max_price|default:1000000 }}" placeholder="حداکثر" min="0">
+                                value="{{ form.max_price.value|default:1000000 }}" placeholder="حداکثر" min="0">
                         </div>
                     </div>
 
