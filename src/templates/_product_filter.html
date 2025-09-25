@@ -9,17 +9,17 @@
         </div>
 
         <div class="card-body collapse show" id="filterCollapse">
-            <form method="get" class="row g-3">
+            <form method="get" class="row g-3" action="{% url 'product_list' %}">
                 <!-- search -->
                 <div class="col-md-3">
-                    {{ form.search.label_tag }}
-                    {{ form.search }}
+                    <label class="form-label">{{ filter_form.search.label_tag }}</label>
+                    {{ filter_form.search }}
                 </div>
 
                 <!-- Inventory status -->
                 <div class="col-md-2">
-                    {{ form.availability.label_tag }}
-                    {{ form.availability }}
+                    <label class="form-label">{{ filter_form.availability.label_tag }}</label>
+                    {{ filter_form.availability }}
                 </div>
 
                 <!-- Price range -->
