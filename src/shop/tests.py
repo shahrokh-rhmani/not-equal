@@ -1,79 +1,204 @@
-from django.test import TestCase, Client
-from .models import Product
+from django.test import TestCase, RequestFactory
+from django.contrib.auth.models import User
+from django.urls import reverse
+from django.db.models.query import QuerySet
 
-class ListViewTestCase(TestCase):
+from .models import Product, Rating
+from .views import ProductListView
+from .forms import ProductFilterForm, RatingForm
+
+class ProductViewTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Creating test data
+        cls.user = User.objects.create_user(username='testuser', password='12345')
+        cls.product1 = Product.objects.create(
+            name='Product 1', 
+            price=100, 
+            is_available=True,
+
+        )
+        cls.product2 = Product.objects.create(
+            name='Product 2', 
+            price=200, 
+            is_available=False,
+
+        )
+        cls.product3 = Product.objects.create(
+            name='Another item', 
+            price=150, 
+            is_available=True,
+
+        )
+        
+        # Creating ratings
+        Rating.objects.create(
+            product=cls.product1,
+            user=cls.user,
+            score=4,
+            comment='Good product'
+        )
+        Rating.objects.create(
+            product=cls.product1,
+            user=User.objects.create_user(username='otheruser', password='12345'),
+            score=2,
+            comment='Not so good'
+        )
+
     def setUp(self):
-        self.client = Client()
-        
-        # Create test products
-        self.product1 = Product.objects.create(name="Product 1", price=900, is_available=True)
-        self.product2 = Product.objects.create(name="Product 2", price=1000, is_available=True)
-        self.product3 = Product.objects.create(name="Product 3", price=1100, is_available=False)
-        self.product4 = Product.objects.create(name="Product 4", price=1000, is_available=False)
-        self.product5 = Product.objects.create(name="Product 5", price=800, is_available=True)
+        self.factory = RequestFactory()
 
-    # Test method1 excludes products with price=1000 using exclude()
-    def test_method1_excludes_price_1000(self):
-        response = self.client.get('/')
-        method1_results = response.context['method1']
+    def test_product_list_view_get_queryset(self): # 1
+        # Test queryset for product list without filter
+        request = self.factory.get(reverse('product_list'))
+        view = ProductListView()
+        view.request = request
         
-        self.assertEqual(method1_results.count(), 3)
-        self.assertFalse(method1_results.filter(price=1000).exists())
+        queryset = view.get_queryset()
+        self.assertIsInstance(queryset, QuerySet)
+        self.assertEqual(queryset.count(), 3)
         
-        self.assertIn(self.product1, method1_results)
-        self.assertIn(self.product5, method1_results)
-        self.assertNotIn(self.product2, method1_results)
-        self.assertNotIn(self.product4, method1_results)
+        # check annotate
+        first_product = queryset.first()
+        self.assertTrue(hasattr(first_product, 'average_rating'))
+        self.assertTrue(hasattr(first_product, 'ratings_count'))
 
-    # Test method2 excludes products with price=1000 using Q objects
-    def test_method2_excludes_price_1000_with_q(self):
-        response = self.client.get('/')
-        method2_results = response.context['method2']
+    def test_product_list_view_with_filters(self): # 2
+        # test search filter 
+        request = self.factory.get(reverse('product_list'), {'search': 'Product'})
+        view = ProductListView()
+        view.request = request
         
-        self.assertEqual(method2_results.count(), 3)
-        self.assertFalse(method2_results.filter(price=1000).exists())
+        queryset = view.get_queryset()
+        self.assertEqual(queryset.count(), 2)
         
-        method1_results = response.context['method1']
-        self.assertEqual(set(method1_results), set(method2_results))
+        # test price filter 
+        request = self.factory.get(reverse('product_list'), {'min_price': 150, 'max_price': 200})
+        view = ProductListView()
+        view.request = request
+        
+        queryset = view.get_queryset()
+        self.assertEqual(queryset.count(), 2)
+        
+        # test inventory filter 
+        request = self.factory.get(reverse('product_list'), {'availability': 'available'})
+        view = ProductListView()
+        view.request = request
+        
+        queryset = view.get_queryset()
+        self.assertEqual(queryset.count(), 2) 
 
-    #  Test method3 gets only products with price=1000 using double exclude
-    def test_method3_gets_only_price_1000(self):
-        response = self.client.get('/')
-        method3_results = response.context['method3']
+    def test_product_list_view_context_data(self): # 3
+        # test the context data passed to the template
+        request = self.factory.get(reverse('product_list'))
+        response = ProductListView.as_view()(request)
         
-        self.assertEqual(method3_results.count(), 2)
-        self.assertTrue(all(p.price == 1000 for p in method3_results))
-        
-        expected_products = {self.product2, self.product4}
-        self.assertEqual(set(method3_results), expected_products)
+        self.assertIn('products', response.context_data)
+        self.assertIn('filter_form', response.context_data)
+        self.assertIsInstance(response.context_data['filter_form'], ProductFilterForm)
 
-    # Test combined filter: available=True and price!=1000
-    def test_combined_filters_available_and_excludes_price_1000(self):
-        response = self.client.get('/')
-        combined_results = response.context['combined']
+    def test_product_detail_view_get_context_data(self): # 4  
+        # Test for logged-in user
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('product_detail', args=[self.product1.pk]))
         
-        self.assertEqual(combined_results.count(), 2)
+        self.assertEqual(response.status_code, 200)
         
-        self.assertIn(self.product1, combined_results)
-        self.assertIn(self.product5, combined_results)
-        self.assertNotIn(self.product2, combined_results)
-        self.assertNotIn(self.product3, combined_results)
-        self.assertNotIn(self.product4, combined_results)
+        # Check presence of all context variables
+        context = response.context
+        self.assertIn('filter_form', context)
+        self.assertIsInstance(context['filter_form'], ProductFilterForm)
+        self.assertIn('form', context)
+        self.assertIsInstance(context['form'], RatingForm)
+        self.assertIn('ratings', context)
+        self.assertIn('average_rating', context)
+        self.assertIn('ratings_count', context)
+        self.assertIn('user_rating', context)
         
-        self.assertTrue(all(p.is_available for p in combined_results))
-        self.assertTrue(all(p.price != 1000 for p in combined_results))
+        # Check values
+        self.assertEqual(context['average_rating'], 3)  # (4+2)/2
+        self.assertEqual(context['ratings_count'], 2)
+        self.assertEqual(context['ratings'].count(), 2)
+        self.assertEqual(context['user_rating'].score, 4)  # Current user's rating
+        
+        # Check ratings ordering
+        self.assertEqual(
+            list(context['ratings'].values_list('id', flat=True)),
+            list(Rating.objects.filter(product=self.product1)
+                .order_by('-created_at').values_list('id', flat=True))
+        )
+        
+        # Test for guest user
+        self.client.logout()
+        response = self.client.get(reverse('product_detail', args=[self.product1.pk]))
+        self.assertIsNone(response.context['user_rating'])
+        
+        # Test for product without ratings
+        response = self.client.get(reverse('product_detail', args=[self.product3.pk]))
+        self.assertIsNone(response.context['average_rating'])
+        self.assertEqual(response.context['ratings_count'], 0)
+        
 
-    # Test that correct template is used
-    def test_template_used(self):
-        response = self.client.get('/')
-        self.assertTemplateUsed(response, 'list_view.html')
-
-    # Test that method1 and method2 produce identical results
-    def test_method1_and_method2_consistency(self):
-        response = self.client.get('/')
-        method1 = set(response.context['method1'])
-        method2 = set(response.context['method2'])
-        self.assertEqual(method1, method2)
+    def test_product_detail_view_post_rating_authenticated(self): # 5
+        # Log in the user
+        self.client.login(username='testuser', password='12345')
         
-        combined = set(response.context['combined'])
-        self.assertTrue(combined.issubset(method1))
+        # send POST request
+        response = self.client.post(reverse('product_detail', args=[self.product2.pk]), {
+            'submit_rating': '1',
+            'score': 5,
+            'comment': 'Excellent'
+        })
+        
+        # Verify that the rating was created
+        rating_exists = Rating.objects.filter(
+            product=self.product2,
+            user=self.user
+        ).exists()
+        self.assertTrue(rating_exists)
+        
+        # Check redirect to product page
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse('product_detail', args=[self.product2.pk]))
+
+
+    def test_product_detail_view_post_rating_unauthenticated(self): # 6
+        # send POST request with client (not logged in)
+        response = self.client.post(reverse('product_detail', args=[self.product1.pk]), {
+            'submit_rating': '1',
+            'score': 5,
+            'comment': 'Excellent'
+        })
+        
+        # Verify redirect to login page
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(reverse('login')))
+
+
+    def test_product_detail_view_update_rating(self): # 7
+        # test updating an existing rating
+        initial_rating = Rating.objects.create(
+            product=self.product3,
+            user=self.user,
+            score=3,
+            comment='Average'
+        )
+        
+        # Log in user with client
+        self.client.login(username='testuser', password='12345')
+        
+        # send POST request with client
+        response = self.client.post(reverse('product_detail', args=[self.product3.pk]), {
+            'submit_rating': '1',
+            'score': 1,
+            'comment': 'Changed my mind'
+        })
+        
+        # verify rating update
+        updated_rating = Rating.objects.get(pk=initial_rating.pk)
+        self.assertEqual(updated_rating.score, 1)
+        self.assertEqual(updated_rating.comment, 'Changed my mind')
+        
+        # verify redirect
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse('product_detail', args=[self.product3.pk]))
