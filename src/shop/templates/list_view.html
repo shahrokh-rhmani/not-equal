@@ -23,23 +23,23 @@
                 {% endif %}
                 <div class="card-body">
                     <h5 class="card-title text-end">{{ product.name }}</h5>
-
+                    
                     <!-- Rating Stars -->
                     <div class="mb-2">
                         <div class="d-flex ">
                             {% with ''|center:5 as range %}
                             {% for _ in range %}
-                            {% if forloop.counter <= product.average_rating|default:0 %} <span class="star filled ms-1">
-                                ★</span>
-                                {% else %}
+                            {% if forloop.counter <= product.average_rating|default:0 %}
+                                <span class="star filled ms-1">★</span>
+                            {% else %}
                                 <span class="star ms-1">★</span>
-                                {% endif %}
-                                {% endfor %}
-                                {% endwith %}
-                                <span class="text-muted small me-2">({{ product.ratings_count|default:0 }})</span>
+                            {% endif %}
+                            {% endfor %}
+                            {% endwith %}
+                            <span class="text-muted small me-2">({{ product.ratings_count|default:0 }})</span>
                         </div>
                     </div>
-
+                    
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="badge bg-{% if product.is_available %}success{% else %}danger{% endif %}">
                             {% if product.is_available %}
@@ -77,19 +77,41 @@
     {% endif %}
 
     <!-- Pagination -->
+    {% if is_paginated %}
     <nav class="mt-4">
         <ul class="pagination justify-content-center">
-            <li class="page-item">
-                <a class="page-link" href="#">بعدی</a>
-            </li>
-            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item">
-                <a class="page-link" href="#">قبلی</a>
-            </li>
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">قبلی</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">قبلی</span>
+                </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">بعدی</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">بعدی</span>
+                </li>
+            {% endif %}
         </ul>
     </nav>
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -101,7 +123,7 @@
         font-size: 1.5rem;
         color: #6c757d;
     }
-
+    
     .star.filled {
         color: #ffc107;
     }
