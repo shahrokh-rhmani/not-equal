@@ -202,3 +202,44 @@ class ProductViewTests(TestCase):
         # verify redirect
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('product_detail', args=[self.product3.pk]))
+
+
+    def test_product_list_view_pagination(self):
+        # Create enough products to test pagination (you already have 3, let's create 2 more)
+        Product.objects.create(name='Product 4', price=250, is_available=True)
+        Product.objects.create(name='Product 5', price=300, is_available=True)
+        
+        # Test first page
+        response = self.client.get(reverse('product_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('is_paginated' in response.context)
+        self.assertTrue(response.context['is_paginated'])
+        self.assertEqual(len(response.context['products']), 4)  # paginate_by is 4
+        
+        # Test second page (should have 1 item)
+        response = self.client.get(reverse('product_list') + '?page=2')
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['is_paginated'])
+        self.assertEqual(len(response.context['products']), 1)
+
+    def test_product_list_view_pagination_with_filters(self):
+        # Create additional products (5 total)
+        Product.objects.create(name='Filtered Product 1', price=50, is_available=True)
+        Product.objects.create(name='Filtered Product 2', price=60, is_available=True)
+        Product.objects.create(name='Filtered Product 3', price=70, is_available=True)
+        Product.objects.create(name='Filtered Product 4', price=80, is_available=True)
+        Product.objects.create(name='Filtered Product 5', price=90, is_available=True)
+        
+        # Make sure existing product don't interfere by setting their prices outside the range
+        self.product1.price = 120
+        self.product1.save()
+        
+        # Apply a filter that will return exactly 5 products
+        response = self.client.get(reverse('product_list'), {'min_price': 50, 'max_price': 100})
+        
+        # First page should have 4 items
+        self.assertEqual(len(response.context['products']), 4)
+        
+        # Second page should have 1 item (5 total - 4 on first page)
+        response = self.client.get(reverse('product_list'), {'min_price': 50, 'max_price': 100, 'page': 2})
+        self.assertEqual(len(response.context['products']), 1)
