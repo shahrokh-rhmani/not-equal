@@ -1,0 +1,15 @@
+# Development settings
+DEBUG=True
+
+# PostgreSQL settings
+DB_NAME=your_db
+DB_USER=your_user
+DB_PASSWORD=your_password
+DB_HOST=localhost
+DB_PORT=5432
+
+# Allowed hosts
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+# SECRET_KEY
+SECRET_KEY=rp*&$jt-f-ud518-*_8)m+3%b6x)^h8g&j0#3xkj@h7-p2jil5
