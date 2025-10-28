@@ -2,6 +2,11 @@
 
 این پروژه بر اساس سوال <span dir="ltr"><code>[StackOverflow](https://stackoverflow.com/questions/687295/how-do-i-do-a-not-equal-in-django-queryset-filtering)</code></span> درباره نحوه انجام فیلتر "not equal" در Django QuerySet ایجاد شده است.
 
+
+<div align="center">
+<img src="https://github.com/shahrokh-rhmani/not-equal/blob/main/doc/01-img/screenshot/not-equal.png" alt="" width="600"/>
+</div>
+
 # <p dir="rtl" align="justify">توضیحات پروژه:</p>
 
 <p dir="rtl" align="justify">
