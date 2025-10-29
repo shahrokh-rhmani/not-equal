@@ -215,6 +215,9 @@ requirements.txt:
 touch requirements.txt
 pip freeze > requirements.txt
 cat requirements.txt
+#
+pip freeze > ../requirements.txt
+cat ../requirements.txt
 ```
 
 # 3.
@@ -222,6 +225,7 @@ cat requirements.txt
 src/templates/
 ```
 mkdir src/templates/
+mkdir templates/
 ```
 
 src/config/settings.py
@@ -240,6 +244,7 @@ TEMPLATES = [
 src/static/
 ```
 mkdir src/static/
+mkdir static/
 ```
 
 ```python
