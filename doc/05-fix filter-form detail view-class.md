@@ -138,6 +138,12 @@ class ProductDetailView(BaseProductView, DetailView):
         
         return super().post(request, *args, **kwargs)
 ```
+```
+git diff shop/views.py
+```
+
+
+
 <details>
 
 <summary>explanation code: (src/shop/views.py)</summary>
@@ -478,7 +484,7 @@ src/templates/_product_filter.html:
     </div>
 ```
 ```
-git diff src/templates/_product_filter.html
+git diff templates/_product_filter.html
 ```
 
 src/templates/_base.html:
@@ -557,7 +563,7 @@ src/templates/_base.html:
 </html>
 ```
 ```
-git diff src/templates/_base.html
+git diff templates/_base.html
 ```
 
 # 4.
